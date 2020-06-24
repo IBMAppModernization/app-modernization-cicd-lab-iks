@@ -1,42 +1,90 @@
 
-# IBM Client Developer Advocacy App Modernization Series
-
-### Lab - Migrating Legacy JEE apps to IBM Cloud Kubernetes Service
-
-### Part 2 -  Creating a CI/CD Pipeline for deployment to IBM Cloud Kubernetes Service using Jenkins
+# Creating a CI/CD Pipeline for deployment to IBM Cloud Kubernetes Service using Jenkins
 
 ## Overview
 
-In this lab you will  be connecting your Git repository with the Plants by WebSphere app to a Continuous Integration/Continuous Deployment pipeline built with Jenkins that will deploy to a IBM Cloud Kubernetes Service cluster.
+In this lab you will be enabling CI/CD connecting your Git repository with the guestbook app to a Continuous Integration/Continuous Deployment pipeline built with Jenkins that will deploy to a IBM Cloud Kubernetes Service cluster.
 
 ## Setup
 
 If you haven't already:
 
-1. Complete *Part 1 -  Working with Helm*  by following the instructions [here](https://github.com/IBMAppModernization/app-modernization-helm-lab-iks)
+1. Complete the *Helm 101 Lab* by following the instructions [here](https://github.com/IBM/guestbook)
 
-2. Initialize Helm client
-   ```
-   helm init --client-only
-   ```
+1. Fork the [guestbook application](https://github.com/IBM/guestbook)
 
-3. Go to the folder where you cloned the Plants By WebSphere  app in the previous lab
-   ```
-   cd app-modernization-plants-by-websphere-jee6
-   ```   
+3. Clone your fork of the guestbook application, then `cd` into that directory
 
-###  Step 1: Set up the CI/CD pipeline
+```shell
+git clone https://github.com/[git username]/guestbook
+cd guestbook
+```
 
-In this section we will be connecting our cloned Git repo of [this app](https://github.com/IBMAppModernization/app-modernization-plants-by-websphere-jee6)  to set up a Continuous Integration/Continuous Deployment pipeline built with Jenkins. This pipeline contains 4main  steps as follows:
+### Step 0: Create and collect: API Key, Registry Namespace and Cluster Name
+
+We will need all these values when we configure our Jenkins pipeline later.
+
+1. From the IBM Cloud console, open the cloud shell
+2. Create an API key using the following command. **Copy and Paste** the key value, we will use it later in our Jenkins Pipeline
+
+```
+ibmcloud iam api-key-create [key name]
+```
+
+3. Create or access a container registry namespace.
+
+First see if you have access to one
+
+```sh
+ibmcloud cr namespace-list
+```
+
+If you get a value above, copy and paste for later. If you have no namespaces created, run the colloing command to create one.
+
+```sh
+ibmcloud cr namespace-add [namespace name]
+```
+
+4. Access and save the name of your Kubernetes Cluster on IBM Cloud.
+```sh
+ibmcloud ks clusters
+```
+
+If you don't know the name already, run the following command 
+### Step 1: Add Jenkinsfile to the Guestbook App
+
+Copy this [JenkinsFile](Jenkinsfile.ext) to the root of your guestbook project. We have provided a curl script for your convience. 
+
+```sh
+curl https://raw.githubusercontent.com/IBMAppModernization/app-modernization-plants-by-websphere-jee6/master/Jenkinsfile.ext > Jenkinsfile.ext
+```
+
+Commit the changes
+```sh
+git add .
+```
+```sh
+git commit -m "adding jenkinsfile"
+```
+
+Push the changes to your repo
+```sh
+git push
+```
+
+Inspect the [JenkinsFile](Jenkinsfile.ext) to learn what stages we will setup in the next steps.
+
+### Step 2: Set up the CI/CD pipeline
+
+In this section we will be connecting your forked Git repo of [this app](https://github.com/IBM/guestbook) to set up a Continuous Integration/Continuous Deployment pipeline built with Jenkins. This pipeline contains 3 main steps as follows:
 
   | Stage                         | Purpose                                                                        |
   | ----------------------------- | ------------------------------------------------------------------------------ |
-  | Build Application ear File    | Pulls in dependencies from Maven and packages application into .ear file       |
   | Build Docker Image            | Builds the Docker image based on the Dockerfile                                |
   | Push Docker Image to Registry | Uploads the Docker image to the Docker image registry within ICP               |
   | Deploy New Docker Image       | Updates the image tag in the Kubernetes deployment triggering a rolling update |
 
-More details of this pipeline can be found in the [Jenkinsfile](https://raw.githubusercontent.com/IBMAppModernization/app-modernization-plants-by-websphere-jee6/master/Jenkinsfile.ext).
+More details of this pipeline can be found in the [Jenkinsfile](Jenkinsfile).
 
 1. Log into Jenkins using the URL provided to you by your instructor with the credentials provided to you
 
@@ -46,15 +94,25 @@ More details of this pipeline can be found in the [Jenkinsfile](https://raw.gith
 
 3. Click on your pipeline to open it and then click on the **Configure** link in the navigation area at the left to change it's properties
 
-4. Scroll down to the **Build Trigger** section and select **GitHub hook trigger for GIT SCM polling**
+4. Scroll down to the **This project is parameterized**, here you will have to set some values to connect this pipeline to your cluster
+
+- Set the value of **API_KEY** to the API_KEY you created earlier for your ibmcloud account. We will be using this key to give access to deploy to your cluster and to push images to your container registry
+
+- Set the value of the **CLUSTER_NAME** to the name of your Kubernetes cluster you want to deploy to.
+
+- Set the value of the **REGISTRY_NS** to the name of your container registry namespace you viewed (or created) earlier. We will deploy our application image to this location
+
+- Leave the default value of **REGION** unless instructed otherwise. This should match the location of your Kubernetes cluster.
+
+5. Scroll down to the **Build Trigger** section and select **GitHub hook trigger for GIT SCM polling**
 
 ![Build Triggers](images/ss2.png)
 
-5. Scroll down to the **Pipeline** section and find the **Definition** drop down menu. Select **Pipeline script from SCM** and for **SCM** select **Git**.
+6. Scroll down to the **Pipeline** section and find the **Definition** drop down menu. Select **Pipeline script from SCM** and for **SCM** select **Git**.
 
-6. For **Repository URL** enter the url to the cloned repository that you forked earlier (i.e. `https://github.com/[your username]/app-modernization-plants-by-websphere-jee6.git`)
+7. For **Repository URL** enter the url to the cloned repository that you forked earlier (i.e. `https://github.com/[your username]/app-modernization-plants-by-websphere-jee6.git`)
 
-7. Change the **Script Path** to `Jenkinsfile.ext`
+8. Change the **Script Path** to `Jenkinsfile.ext`
 
 
 ![pipeline config](images/ss3.png)
