@@ -60,10 +60,17 @@ Copy this [JenkinsFile](Jenkinsfile.ext) to the root of your guestbook project. 
 curl https://raw.githubusercontent.com/IBMAppModernization/app-modernization-cicd-lab-iks/helm-v3/Jenkinsfile.ext > Jenkinsfile.ext
 ```
 
+Configure git client (if needed)
+```sh
+git config --global user.email "[your email]"
+git config --global user.name "[your first and last name]"
+```
+
 Commit the changes
 ```sh
 git add .
 ```
+
 ```sh
 git commit -m "adding jenkinsfile"
 ```
@@ -171,7 +178,13 @@ Now you'll configure Github to trigger your pipeline whenever code is committed.
 
 13. When the pipeline is finish deploying, launch the app to verify the change you made.
 
-14. From the cloud shell, run the following command to get the port number of your deployed app
+14. From the cloud shell, run the following command to configure your `kubectl` client to talk to your cluster
+
+   ```
+   ibmcloud ks cluster config --cluster [cluster name]
+   ```
+
+15. Next, run the following command to get the port number of your deployed app
 
    ```
    kubectl --namespace default get service guestbook -o jsonpath='{.spec.ports[0].nodePort}'
@@ -182,14 +195,14 @@ Now you'll configure Github to trigger your pipeline whenever code is committed.
    >Replace $CLUSTER_NAME with the name of your cluster
 
    ```bash
-   ibmcloud cs workers $CLUSTER_NAME | grep -v '^*' | egrep -v "(ID|OK)" | awk '{print $2;}' | head -n1
+   ibmcloud cs workers --cluster $CLUSTER_NAME | grep -v '^*' | egrep -v "(ID|OK)" | awk '{print $2;}' | head -n1
    ```
 
 16. Your app's URL is the IP address of the first worker node with the port number of the deployed app. For example if your external IP is 169.61.73.182 and the port is 30961 the URL will be ```http://169.61.73.182:30961```
 
-17. Enter the URL in hr browser's address bar and verify that the price of the Bonsai tree has been reduced.
+17. Enter the URL in hr browser's address bar and verify that the header of the page has been changed.
 
-![Price reduced](images/ss9.png)
+![Header changed](images/guestbook-updated.png)
 
 ## Summary
 
