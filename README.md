@@ -56,7 +56,7 @@ If you don't know the name already, run the following command
 Copy this [JenkinsFile](Jenkinsfile.ext) to the root of your guestbook project. We have provided a curl script for your convience. 
 
 ```sh
-curl https://raw.githubusercontent.com/IBMAppModernization/app-modernization-plants-by-websphere-jee6/master/Jenkinsfile.ext > Jenkinsfile.ext
+curl https://raw.githubusercontent.com/IBMAppModernization/app-modernization-cicd-lab-iks/helm-v3/Jenkinsfile.ext > Jenkinsfile.ext
 ```
 
 Commit the changes
