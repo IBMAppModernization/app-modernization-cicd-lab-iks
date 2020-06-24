@@ -9,11 +9,9 @@ In this lab you will be enabling CI/CD connecting your Git repository with the g
 
 If you haven't already:
 
-1. Complete the *Helm 101 Lab* by following the instructions [here](https://github.com/IBM/guestbook)
+1. Fork the [guestbook application](https://github.com/IBM/guestbook). You will need to create a GitHub account if you don't have one already.
 
-1. Fork the [guestbook application](https://github.com/IBM/guestbook)
-
-3. Clone your fork of the guestbook application, then `cd` into that directory
+2. Clone your fork of the guestbook application, then `cd` into that directory.
 
 ```shell
 git clone https://github.com/[git username]/guestbook
@@ -24,7 +22,10 @@ cd guestbook
 
 We will need all these values when we configure our Jenkins pipeline later.
 
-1. From the IBM Cloud console, open the cloud shell
+1. From the IBM Cloud console, open the cloud shell. Make sure you have the right account selected in the dropdown (the one with your Kuebrnetes cluster which you want to deploy to)
+
+![](images/cloud-shell.png)
+
 2. Create an API key using the following command. **Copy and Paste** the key value, we will use it later in our Jenkins Pipeline
 
 ```
@@ -33,24 +34,24 @@ ibmcloud iam api-key-create [key name]
 
 3. Create or access a container registry namespace.
 
-First see if you have access to one
+First, see if you have access to one already.
 
 ```sh
 ibmcloud cr namespace-list
 ```
 
-If you get a value above, copy and paste for later. If you have no namespaces created, run the colloing command to create one.
+If you get a value above, copy and paste for later. If you have no namespaces created, run the following command to create one.
 
 ```sh
 ibmcloud cr namespace-add [namespace name]
 ```
 
 4. Access and save the name of your Kubernetes Cluster on IBM Cloud.
+
 ```sh
 ibmcloud ks clusters
 ```
 
-If you don't know the name already, run the following command 
 ### Step 1: Add Jenkinsfile to the Guestbook App
 
 Copy this [JenkinsFile](Jenkinsfile.ext) to the root of your guestbook project. We have provided a curl script for your convience. 
@@ -110,12 +111,12 @@ More details of this pipeline can be found in the [Jenkinsfile](Jenkinsfile).
 
 6. Scroll down to the **Pipeline** section and find the **Definition** drop down menu. Select **Pipeline script from SCM** and for **SCM** select **Git**.
 
-7. For **Repository URL** enter the url to the cloned repository that you forked earlier (i.e. `https://github.com/[your username]/app-modernization-plants-by-websphere-jee6.git`)
+7. For **Repository URL** enter the url to the cloned repository that you forked earlier (i.e. `https://github.com/[your username]/guestbook.git`)
 
 8. Change the **Script Path** to `Jenkinsfile.ext`
 
 
-![pipeline config](images/ss3.png)
+![pipeline config](images/pipeline-from-scm.png)
 
 8. Click **Save**.
 
@@ -132,7 +133,7 @@ More details of this pipeline can be found in the [Jenkinsfile](Jenkinsfile).
 ![End of console output](images/ss5.png)
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The Stage View of the pipeline should look like the following:
-![Stage view](images/stages.png)
+![Stage view](images/successful-run.png)
 
 ### Step 4: Trigger a build via a commit to Github
 
@@ -142,7 +143,7 @@ Now you'll configure Github to trigger your pipeline whenever code is committed.
 
 2. Click on the repository settings
 
-![Settings](images/ss6.png)
+![Settings](images/repo-settings.png)
 
 3. Under **Options** select **Webhooks** and click **Add webhook**
 
@@ -156,15 +157,11 @@ Now you'll configure Github to trigger your pipeline whenever code is committed.
 
 ![Add webhook](images/ss8.png)
 
-7. In the Github file browser drill down to *pbw-web/src/main/webapp/promo.xhtml*
+7. In the Github file browser drill down to */v1/guestbook/public/index.html*
 
-8. Click on the pencil icon to edit **promo.xhtml**  and on line 95 locate the price of the Bonsai Tree
+8. Click on the pencil icon to edit **index.html**  and on line 12 locate the header of the page
 
-9. Change  `$30.00 each` to `<strike>$30.00</strike> $25.00 each`
-
-This will show the price of the Bonsai Tree as being reduced even more
-
-![Reduce Bonsai price](images/ss10.png)
+9. Change  `Guestbook - v1` to `Guestbook - updated!`... or whatever you want!
 
 10. At the bottom of the UI window add a commit message and click on **Commit changes**
 
@@ -174,18 +171,18 @@ This will show the price of the Bonsai Tree as being reduced even more
 
 13. When the pipeline is finish deploying, launch the app to verify the change you made.
 
-14.Run the following command to get the port number of your deployed app
+14. From the cloud shell, run the following command to get the port number of your deployed app
 
    ```
-   kubectl --namespace default get service pbw-liberty-mariadb-liberty -o jsonpath='{.spec.ports[0].nodePort}'
+   kubectl --namespace default get service guestbook -o jsonpath='{.spec.ports[0].nodePort}'
    ```
 
 15. Run the following command to get the external IP address  of the first worker node in your cluster
 
-   >If you don't have the $USERNAME environment variable in the command set, replace $USERNAME with your lab user id.
+   >Replace $CLUSTER_NAME with the name of your cluster
 
    ```bash
-   ibmcloud cs workers $USERNAME-cluster | grep -v '^*' | egrep -v "(ID|OK)" | awk '{print $2;}' | head -n1
+   ibmcloud cs workers $CLUSTER_NAME | grep -v '^*' | egrep -v "(ID|OK)" | awk '{print $2;}' | head -n1
    ```
 
 16. Your app's URL is the IP address of the first worker node with the port number of the deployed app. For example if your external IP is 169.61.73.182 and the port is 30961 the URL will be ```http://169.61.73.182:30961```
@@ -194,17 +191,6 @@ This will show the price of the Bonsai Tree as being reduced even more
 
 ![Price reduced](images/ss9.png)
 
-## Cleanup
-
-Free up resources for subsequent labs by deleting the Plants by Websphere app.
-
-1. Run the following command to delete the app
-
-   ```
-   helm delete --purge pbw-liberty-mariadb
-   ```
-
-
 ## Summary
 
-You created a Jenkins pipeline to automatically build and deploy an app that has been updated in Github .
+You created a Jenkins pipeline to automatically build and deploy an app that has been updated in Github.
