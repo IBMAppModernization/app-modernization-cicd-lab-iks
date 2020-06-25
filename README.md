@@ -219,7 +219,7 @@ Now you'll configure Github to trigger your pipeline whenever code is committed.
 
 12. Verify that your pipeline starts building.
 
-13. When the pipeline is finish deploying, refresh the browser window where you previously loaded the app to verify the change you made.
+13. When the pipeline is finish deploying, force-refresh (`⌘ + shift + R` on mac) the browser window where you previously loaded the app to verify the change you made.
 
 > *Note: If you closed the browser window, follow steps 5 - 9 of the previous section to get the URL of the application again.
 
