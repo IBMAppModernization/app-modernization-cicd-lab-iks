@@ -89,7 +89,7 @@ git commit -m "adding jenkinsfile"
 
 * Push the changes to your repo:
 
-```shell
+```bash
 git push
 ```
 
@@ -147,79 +147,81 @@ More details of this pipeline can be found in the [Jenkinsfile](Jenkinsfile).
 
 ## Step 3: Manually trigger a build to test pipeline
 
-In Jenkins in the navigation area on the left click on **Build with Parameters**. Accept the defaults of the parameters and click on **Build**
+1. In Jenkins in the navigation area on the left click on **`Build with Parameters`**. Accept the defaults of the parameters and click on **`Build`**
 
-To see the console output click on the build number in the **Build History** and then click on **Console Output**
+2. To see the console output, click on the build number in the **Build History** and then click on **Console Output**
 
 ![Console output](images/ss4.png)
 
-If the build is successful the end of the console output should look like the following:
+3. If the build is successful the end of the console output should look like the following:
 
 ![End of console output](images/ss5.png)
 
-The Stage View of the pipeline should look like the following:
+4. The Stage View of the pipeline should look like the following:
 
 ![Stage view](images/successful-run.png)
+
+5. When the pipeline is finish deploying, launch the app to verify the it has been deployed and is running. From the cloud shell, run the following command to configure your `kubectl` client to talk to your cluster:
+
+```shell
+ibmcloud ks cluster config --cluster [cluster name]
+```
+
+6. Next, run the following command to get the port number of your deployed app:
+
+```shell
+kubectl --namespace default get service guestbook -o jsonpath='{.spec.ports[0].nodePort}'
+```
+
+7. Run the following command to get the external IP address of the first worker node in your cluster:
+
+```bash
+ibmcloud ks workers --cluster $CLUSTER_NAME | grep -v '^*' | egrep -v "(ID|OK)" | awk '{print $2;}' | head -n1
+```
+
+8. Your app's URL is the IP address of the first worker node with the port number of the deployed app. For example if your external IP is 169.61.73.182 and the port is 30961 the URL will be ```http://169.61.73.182:30961```
+
+9. Enter the URL in your browser's address bar and verify that the application loads.
+
+![Guestbook](images/guestbook.png)
 
 ## Step 4: Trigger a build via a commit to Github
 
 Now you'll configure Github to trigger your pipeline whenever code is committed.
 
-Go back to Github and find your cloned repository
+1. Go back to Github and find your cloned repository
 
-Click on the repository settings
+2. Click on the repository settings
 
 ![Settings](images/repo-settings.png)
 
-Under **Options** select **Webhooks** and click **Add webhook**
+3. Under **`Options`** select **`Webhooks`** and click **`Add webhook`**
 
 ![Add webhook](images/ss7.png)
 
-For the Payload URL use `<Jenkins URL>/github-webhook/`  where `<Jenkins URL>` is the URL you used to login to Jenkins (**Note** Don't forget the trailing `/`)
+4. For the Payload URL use `<Jenkins URL>/github-webhook/`  where `<Jenkins URL>` is the URL you used to login to Jenkins (**Note** Don't forget the trailing `/`)
 
-Change content type to **application/json**
+5. Change content type to **application/json**
 
-Accept the other defaults and click **Add webhook**
+6. Accept the other defaults and click **`Add webhook`**
 
 ![Add webhook](images/ss8.png)
 
-In the Github file browser drill down to */v1/guestbook/public/index.html*
+7. In the Github file browser drill down to */v1/guestbook/public/index.html*
 
-Click on the pencil icon to edit **index.html**  and on line 12 locate the header of the page
+8. Click on the pencil icon to edit **index.html**  and on line 12 locate the header of the page
 
-Change  `Guestbook - v1` to `Guestbook - updated!`... or whatever you want!
+9. Change  `Guestbook - v1` to `Guestbook - updated!`... or whatever you want!
 
-At the bottom of the UI window add a commit message and click on **Commit changes**
+10. At the bottom of the UI window add a commit message and click on **Commit changes**
 
-Switch back to Jenkins  and open the pipeline that you were working on  earlier.
+11. Switch back to Jenkins and open the pipeline that you were working on  earlier.
 
-Verify that your pipeline  starts building.
+12. Verify that your pipeline starts building.
 
-When the pipeline is finish deploying, launch the app to verify the change you made.
+13. When the pipeline is finish deploying, refresh the browser window where you previously loaded the app to verify the change you made.
 
-From the cloud shell, run the following command to configure your `kubectl` client to talk to your cluster
-
-```sh
-ibmcloud ks cluster config --cluster [cluster name]
-```
-
-Next, run the following command to get the port number of your deployed app
-
-```sh
-kubectl --namespace default get service guestbook -o jsonpath='{.spec.ports[0].nodePort}'
-```
-
-Run the following command to get the external IP address  of the first worker node in your cluster
-
->Replace $CLUSTER_NAME with the name of your cluster
-
-```bash
-ibmcloud cs workers --cluster $CLUSTER_NAME | grep -v '^*' | egrep -v "(ID|OK)" | awk '{print $2;}' | head -n1
-```
-
-Your app's URL is the IP address of the first worker node with the port number of the deployed app. For example if your external IP is 169.61.73.182 and the port is 30961 the URL will be ```http://169.61.73.182:30961```
-
-Enter the URL in hr browser's address bar and verify that the header of the page has been changed.
+> *Note: If you closed the browser window, follow steps 5 - 9 of the previous section to get the URL of the application again.
 
 ![Header changed](images/guestbook-updated.png)
 
