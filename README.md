@@ -119,7 +119,7 @@ In this section we will be connecting your forked Git repo of [this app](https:/
   | Push Docker Image to Registry | Uploads the Docker image to the Docker image registry within ICP               |
   | Deploy New Docker Image       | Updates the image tag in the Kubernetes deployment triggering a rolling update |
 
-More details of this pipeline can be found in the [Jenkinsfile](Jenkinsfile).
+More details of this pipeline can be found in the [Jenkinsfile.ext](Jenkinsfile.ext).
 
 1. Log into Jenkins using the URL provided to you by your instructor with the credentials provided to you.
 
@@ -169,13 +169,7 @@ More details of this pipeline can be found in the [Jenkinsfile](Jenkinsfile).
 
    ![Stage view](images/successful-run.png)
 
-1. When the pipeline is finish deploying, launch the app to verify the it has been deployed and is running. From the cloud shell, run the following command to configure your `kubectl` client to talk to your cluster:
-
-   ```shell
-   ibmcloud ks cluster config --cluster [cluster name]
-   ```
-
-1. Next, run the following command to get the port number of your deployed app:
+1. When the pipeline is finish deploying, launch the app to verify the it has been deployed and is running. Run the following command to get the port number of your deployed app:
 
    ```shell
    kubectl --namespace default get service guestbook -o jsonpath='{.spec.ports[0].nodePort}'
