@@ -137,7 +137,7 @@ More details of this pipeline can be found in the [Jenkinsfile.ext](Jenkinsfile.
 
    * Set the value of the **`REGISTRY_NS`** to the name of your container registry namespace you viewed (or created) earlier. We will deploy our application image to this location.
 
-   * Leave the default value of **`REGION`** unless instructed otherwise. This should match the location of your Kubernetes cluster.
+   * Update **`REGION`** to match the location of your Kubernetes cluster. You can view the location by running `ibmcloud ks clusters`.
 
 1. Scroll down to the **`Build Trigger`** section and select **`GitHub hook trigger for GIT SCM polling`**.
 
